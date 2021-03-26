@@ -1,0 +1,67 @@
+﻿@model List<CovidDTO.Model.dtoReport>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .alignRigth {
+        text-align: right;
+    }
+
+    .alignLeft {
+        text-align: left;
+    }
+
+    #Detail {
+        width: 70%;
+        margin: 0 auto;
+    }
+</style>
+<h2>TOP 10 COVID CASES</h2>
+
+@using (Ajax.BeginForm("Filter", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "Detail", 
+        InsertionMode = InsertionMode.Replace, OnBegin = "showLoader", 
+        OnComplete = "hideLoader", OnFailure= "hideLoader" }))
+{
+    @Html.AntiForgeryToken();
+    <div class="form-horizontal">
+        <div class="form-group">
+            <div class="col-md-3">
+                @Html.DropDownList("region", new SelectList(ViewBag.Regions, "iso", "name"), "-- Regions --", new { @class = "form-control selectpicker", @data_live_search = "true" })
+            </div>
+            @Html.Label("Export", htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-3">
+                <input type="button" value="XML" class="btn btn-default export" />
+                <input type="button" value="JSON" class="btn btn-default export" />
+                <input type="button" value="CSV" class="btn btn-default export" />
+            </div>
+        </div>
+    </div>
+
+}
+
+<div id="Detail">
+    @Html.Partial(Url.Content("partial/RegionDetail"), Model)
+</div>
+<script>
+    $(document).ready(function () {
+        $("#region").selectpicker();
+        $("#region").change(function () {
+            $("form").submit();
+        });
+        $("form").submit();
+    });
+    $(".export").click(function () {
+        showLoader();
+        var fileDownloadCheckTimer = window.setInterval(function () {
+            var cookieValue = $.cookie("fileDownloadToken");
+            if (cookieValue != undefined && cookieValue != '') {
+                window.clearInterval(fileDownloadCheckTimer);
+                $.removeCookie('fileDownloadToken');
+                hideLoader();
+            }
+        }, 5000);
+        window.location = "/Home/Export?type=" + $(this).val() + "&region=" + $("#region").val();
+    });
+</script>
