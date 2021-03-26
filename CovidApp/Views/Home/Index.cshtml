@@ -61,7 +61,7 @@
                 $.removeCookie('fileDownloadToken');
                 hideLoader();
             }
-        }, 5000);
+        }, 1000);
         window.location = "/Home/Export?type=" + $(this).val() + "&region=" + $("#region").val();
     });
 </script>
